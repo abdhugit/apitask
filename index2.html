@@ -1,0 +1,101 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joke Generator</title>
+</head>
+
+<body style="margin:0; padding:30px; background:lightgoldenrodyellow; font-family:Arial,sans-serif; color:black">
+     <img style="width: 100px;" src="./assets/Joyful Joke Generator Emoji Logo.png" alt=""> <h1 style="text-align:center;  margin-bottom:30px;">😆 𝕁𝕠𝕜𝕖 𝔾𝕖𝕟𝕖𝕣𝕒𝕥𝕠𝕣</h1>
+
+    <div style="max-width:600px; margin:0 auto 40px; padding:25px; background:white; border:10px solid red; border-radius:50px;">
+       <h3 id="setup" style="font-size:22px; margin-bottom:15px;"></h3>
+       <h3 id="punchline" style="font-size:17px; color:orangered; margin-bottom:25px;"></h3>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+
+            <button onclick="getData()" style="padding:11px 18px; background:#222; color:white; border:none; border-radius:10px; cursor:pointer;">Generate New</button>
+            <button onclick="addTofav()" style="padding:11px 18px; background:#eee; color:#222; border:none; border-radius:10px; cursor:pointer;">Add to Fav</button>
+
+        </div>
+    </div>
+
+    <h1 style="text-align:center; font-size:25px; margin-bottom:20px;">Favourites❤️</h1>
+
+    <div style="max-width:1100px; margin:auto; overflow-x:auto; background:white; border:1px solid #ddd; border-radius:8px;">
+         <table style="width:100%; border-collapse:collapse; text-align:left;">
+
+            <thead>
+                <tr style="background:white">
+                    <th style="padding:14px; border-bottom:1px solid #ddd;">ID</th>
+                    <th style="padding:14px; border-bottom:1px solid #ddd;">Type</th>
+                    <th style="padding:14px; border-bottom:1px solid #ddd;">Setup</th>
+                    <th style="padding:14px; border-bottom:1px solid #ddd;">Punchline</th>
+                    <th style="padding:14px; border-bottom:1px solid #ddd;">Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="result"></tbody>
+
+        </table>
+    </div>
+
+   <script>
+    let apiRes = null
+
+    let favourites = JSON.parse(localStorage.getItem('data')) || []
+
+    const getData = async () => {
+        try {
+            apiRes = await fetch('https://official-joke-api.appspot.com/random_joke')
+            apiRes = await apiRes.json()
+
+            console.log(apiRes)
+
+            document.querySelector('#setup').innerText = apiRes.setup
+            document.querySelector('#punchline').innerText = apiRes.punchline
+
+        } catch (error) {
+            console.log(error)
+            alert('error occured')
+        }
+    }
+
+    getData()
+
+    const addTofav = () => {
+        favourites.unshift(apiRes)
+        let jsonData = JSON.stringify(favourites)
+        localStorage.setItem('data', jsonData)
+        showFavourites()
+        alert('added to favourites')
+    }
+
+    const showFavourites = () => {
+        let resultEl = document.querySelector('#result')
+        resultEl.innerHTML = ""
+        favourites.map((eachData) => (
+            resultEl.innerHTML += `<tr>
+                <td style="padding:14px;">${eachData.id}</td>
+                <td style="padding:14px;">${eachData.type}</td>
+                <td style="padding:14px;">${eachData.setup}</td>
+                <td style="padding:14px;">${eachData.punchline}</td>
+                <td style="padding:14px;">
+                <button onclick="deleteData(${eachData.id})" style="padding:8px 12px; background:black; color:#e63946; border:none; border-radius:5px;"> 🗑 Delete </button>
+                </td>
+            </tr>`)
+        )
+    }
+
+    showFavourites()
+
+    const deleteData = (dId) => {
+    favourites = favourites.filter((eachData) => eachData.id != dId)
+     localStorage.setItem('data', JSON.stringify(favourites))
+     showFavourites()
+    }
+</script>
+</body>
+</html>

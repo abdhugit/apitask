@@ -1,0 +1,145 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joke App</title>
+</head>
+
+<body style="background-color:white;  margin: 0; padding: 30px; color:gray">
+<div style="max-width: 1000px; margin: auto;">
+<h1 style="text-align: center; font-size: 32px; margin-bottom: 25px;">Joke App</h1>
+ <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px white">
+<div style="background-color:white; padding: 20px; border-radius: 8px; min-height: 100px;">
+
+    <h3 id="setup" style="font-size: 20px; line-height: 1.6; color:gray;">Loading joke...</h3>
+
+                <h3 id="punchline" style="font-size: 16px; line-height: 1.6; color: #777;"></h3>
+
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 25px;">
+
+                <button onclick="getData()" style="background-color: #333; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer;">
+                    Generate New
+                </button>
+
+                <button onclick="addTofav()" style="background-color: #e7e7e7; color: #333; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer;">
+                    Add to Fav
+                </button>
+
+            </div>
+
+        </div>
+
+        <h2 style="font-size: 24px; margin-top: 35px; margin-bottom: 15px;">
+            Favourites
+        </h2>
+
+        <div style="overflow-x: auto; background-color: white; border-radius: 8px; box-shadow: 0 2px 10px #ddd;">
+
+            <table border="1" style="width: 100%; border-collapse: collapse; border-color: #ddd; text-align: left;">
+
+                <thead style="background-color: #e5e5e5; color: #333;">
+                    <tr>
+                        <th style="padding: 14px;">ID</th>
+                        <th style="padding: 14px;">Type</th>
+                        <th style="padding: 14px;">Setup</th>
+                        <th style="padding: 14px;">Punchline</th>
+                        <th style="padding: 14px;">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody id="result"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <script>
+        let apiRes = null;
+
+        let favourites = JSON.parse(localStorage.getItem("data")) || [];
+
+        const getData = async () => {
+            try {
+                let response = await fetch(
+                    "https://official-joke-api.appspot.com/random_joke"
+                );
+
+                apiRes = await response.json();
+
+                document.querySelector("#setup").innerText = apiRes.setup;
+                document.querySelector("#punchline").innerText = apiRes.punchline;
+
+            } catch (error) {
+                console.log(error);
+                alert("Error occurred");
+            }
+        };
+
+        const addTofav = () => {
+            if (!apiRes) return;
+
+            favourites.unshift(apiRes);
+
+            localStorage.setItem("data", JSON.stringify(favourites));
+
+            showFavourites();
+        };
+
+        const showFavourites = () => {
+            favourites = JSON.parse(localStorage.getItem("data")) || [];
+
+            let resultEl = document.querySelector("#result");
+            resultEl.innerHTML = "";
+
+            if (favourites.length === 0) {
+                resultEl.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 20px; color: #777;">
+                            No favourite jokes yet.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            favourites.forEach((eachData, index) => {
+                resultEl.innerHTML += `
+                    <tr>
+                        <td style="padding: 14px;">${eachData.id}</td>
+                        <td style="padding: 14px;">${eachData.type}</td>
+                        <td style="padding: 14px;">${eachData.setup}</td>
+                        <td style="padding: 14px;">${eachData.punchline}</td>
+                        <td style="padding: 14px;">
+                            <button
+                                onclick="deleteData(${index})"
+                                style="background-color: #fee2e2; color: #dc2626; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer;">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        };
+
+        const deleteData = (index) => {
+            favourites = JSON.parse(localStorage.getItem("data")) || [];
+
+            favourites.splice(index, 1);
+
+            localStorage.setItem("data", JSON.stringify(favourites));
+
+            showFavourites();
+        };
+
+        getData();
+        showFavourites();
+    </script>
+
+</body>
+</html>
